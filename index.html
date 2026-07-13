@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión de Documentación — Prácticas UNIMINUTO</title>
+<meta name="description" content="Herramienta interna para el registro y seguimiento de documentación de estudiantes en prácticas profesionales UNIMINUTO.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">MD</div>
+    <div class="brand-text">
+      <div class="line1">UNIMINUTO</div>
+      <div class="line2">Oficina de Personal de Apoyo</div>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="tab-btn active" data-view="dashboard">Dashboard</button>
+    <button class="tab-btn" data-view="registro">Registrar estudiante</button>
+    <button class="tab-btn" data-view="correos">Generador de correos</button>
+  </nav>
+</header>
+
+<main class="page">
+
+  <!-- ================= VISTA: DASHBOARD ================= -->
+  <section id="view-dashboard" class="view active">
+    <div class="page-head">
+      <div>
+        <h2>Seguimiento de documentación</h2>
+        <p>Registro y estado de la documentación de prácticas profesionales.</p>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-outline" id="btn-export-excel">Descargar Excel</button>
+        <button class="btn btn-primary" id="btn-go-registro">Registrar estudiante</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card gold">
+        <div class="label">Total registrados</div>
+        <div class="value" id="stat-total">0</div>
+      </div>
+      <div class="stat-card green">
+        <div class="label">Documentación completa</div>
+        <div class="value" id="stat-completos">0</div>
+      </div>
+      <div class="stat-card red">
+        <div class="label">Documentación incompleta</div>
+        <div class="value" id="stat-incompletos">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Avance</div>
+        <div class="value" id="stat-avance">0%</div>
+      </div>
+    </div>
+
+    <div class="filters-bar">
+      <input type="text" class="search-input" id="input-search" placeholder="Buscar por nombre o número de identificación…">
+      <select class="filter-select" id="filter-status">
+        <option value="todas">Todos los estados</option>
+        <option value="completa">Completa</option>
+        <option value="incompleta">Incompleta</option>
+      </select>
+      <select class="filter-select" id="filter-modality">
+        <option value="todas">Todas las modalidades</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Estudiante</th>
+            <th>Identificación</th>
+            <th>Modalidad</th>
+            <th>Estado</th>
+            <th>Documentos faltantes</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <!-- filas generadas por JS -->
+        </tbody>
+      </table>
+      <div id="empty-state" class="empty-state" style="display:none;">
+        <h3>Aún no hay estudiantes registrados</h3>
+        <p>Empieza registrando el primer estudiante para hacer seguimiento a su documentación.</p>
+      </div>
+      <div class="pagination" id="pagination">
+        <span id="pagination-info"></span>
+        <div class="pager-btns">
+          <button class="btn btn-outline btn-sm" id="btn-prev-page">Anterior</button>
+          <button class="btn btn-outline btn-sm" id="btn-next-page">Siguiente</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= VISTA: REGISTRO ================= -->
+  <section id="view-registro" class="view">
+    <div class="page-head">
+      <div>
+        <h2 id="registro-title">Registrar estudiante</h2>
+        <p>Ingresa el nombre, identificación y estado de la documentación.</p>
+      </div>
+    </div>
+
+    <form class="form-card" id="form-registro">
+      <input type="hidden" id="field-id">
+
+      <div class="form-row">
+        <label for="field-name">Nombre completo</label>
+        <input type="text" id="field-name" required placeholder="Ej: Vector Ramírez">
+      </div>
+
+      <div class="form-row">
+        <label for="field-studentId">Número de identificación</label>
+        <input type="text" id="field-studentId" required placeholder="Ej: 1082456789">
+      </div>
+
+      <div class="form-row">
+        <label for="field-modality">Modalidad de práctica</label>
+        <select id="field-modality" required></select>
+      </div>
+
+      <div class="form-row">
+        <label>Estado de la documentación</label>
+        <div class="status-toggle">
+          <div class="status-option" data-status="completa">Completa</div>
+          <div class="status-option" data-status="incompleta">Incompleta</div>
+        </div>
+      </div>
+
+      <div class="form-row" id="row-checklist" style="display:none;">
+        <label>Documentos faltantes</label>
+        <div class="doc-checklist" id="doc-checklist"></div>
+        <div class="hint">Marca los documentos que aún no han sido enviados por el estudiante.</div>
+      </div>
+
+      <div class="form-row">
+        <label for="field-notes">Notas internas (opcional)</label>
+        <textarea id="field-notes" rows="2" placeholder="Observaciones adicionales…"></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="btn-save-student">Guardar estudiante</button>
+        <button type="button" class="btn btn-outline" id="btn-cancel-form">Cancelar</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ================= VISTA: GENERADOR DE CORREOS ================= -->
+  <section id="view-correos" class="view">
+    <div class="page-head">
+      <div>
+        <h2>Generador de correos</h2>
+        <p>Selecciona un estudiante para generar automáticamente el correo de documentación correcta o incompleta.</p>
+      </div>
+    </div>
+
+    <div class="form-card" style="max-width: 720px;">
+      <div class="form-row">
+        <label for="correo-select-student">Estudiante</label>
+        <select id="correo-select-student">
+          <option value="">Selecciona un estudiante registrado</option>
+        </select>
+        <div class="hint">La lista se toma de los estudiantes ya registrados en el Dashboard.</div>
+      </div>
+
+      <div id="correo-panel" style="display:none;">
+        <div class="form-row" id="correo-status-row">
+          <label>Estado de la documentación</label>
+          <div id="correo-status-badge"></div>
+        </div>
+
+        <div class="form-row">
+          <label for="correo-subject">Asunto</label>
+          <input type="text" id="correo-subject" readonly>
+        </div>
+
+        <div class="form-row">
+          <label for="correo-to">Correo del estudiante (opcional, para abrir en tu cliente de correo)</label>
+          <input type="text" id="correo-to" placeholder="nombre@correo.com">
+        </div>
+
+        <div class="form-row">
+          <label>Mensaje generado</label>
+          <div class="email-preview" id="correo-preview"></div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" id="btn-copy-correo">Copiar mensaje</button>
+          <button class="btn btn-dark" id="btn-open-correo-mailto">Abrir en cliente de correo</button>
+        </div>
+      </div>
+
+      <div id="correo-empty" class="empty-state">
+        <h3>Aún no hay estudiantes para generar correos</h3>
+        <p>Registra al menos un estudiante desde la pestaña "Registrar estudiante".</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  Herramienta interna de la Oficina de Personal de Apoyo — UNIMINUTO. Los datos se almacenan localmente en este navegador.
+</footer>
+
+<!-- ================= MODAL: CONFIRMAR ELIMINAR ================= -->
+<div class="modal-overlay" id="modal-delete">
+  <div class="modal-box" style="max-width: 420px;">
+    <div class="modal-head">
+      <h3>Eliminar registro</h3>
+      <button class="modal-close" id="close-delete-modal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13.5px; color: var(--gray-600);">¿Seguro que deseas eliminar este estudiante de la base de datos? Esta acción no se puede deshacer.</p>
+      <div class="form-actions">
+        <button class="btn btn-dark" id="btn-confirm-delete" style="background: var(--red);">Sí, eliminar</button>
+        <button class="btn btn-outline" id="btn-cancel-delete">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- SheetJS para exportar a Excel -->
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+<script src="assets/js/storage.js"></script>
+<script src="assets/js/emailGenerator.js"></script>
+<script src="assets/js/excelExport.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
